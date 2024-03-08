@@ -35,7 +35,7 @@
     <main class="flex-shrink-0">
       <div class="container">
         <div class="bg-body-tertiary p-5 rounded">
-          <h1>Are you paying to much?</h1>
+          <h1>Are you paying too much?</h1>
           <p class="lead">This is a regression model that predicts the price you should be paying.</p>
           <div class="row mt-4 g-2 align-items-end">
             <div class="col-12 col-sm-6 col-md-3">
@@ -61,7 +61,10 @@
               </select>
             </div>
             <div class="col-6 col-md-2 d-flex align-items-end">
-              <button id="getprice" class="btn btn-primary">Get Price</button>
+              <button id="getprice" class="btn btn-primary">
+                <span id="spinner" class="d-none spinner-border spinner-border-sm" aria-hidden="true"></span>
+                <span id="status" role="status">Get Price</span>
+              </button>
             </div>
           </div>
         </div>
@@ -81,6 +84,7 @@
     <script>
       const pyWorker = new Worker("worker.js");
       const button = document.querySelector('#getprice');
+      const status = document.querySelector('#status');
       button.addEventListener('click', () => {
         const txtBfs_number = document.querySelector('#bfs_number').value;
         const txtArea = document.querySelector('#area').value;
@@ -93,10 +97,15 @@
         const rooms = parseFloat(txtRooms);
         pyWorker.postMessage({ bfs_number, area, rooms });
         button.setAttribute('disabled', 'disabled');
+        spinner.classList.remove('d-none');
+        status.textContent = 'Calculating...';
       });
       pyWorker.onmessage = (event) => {
         document.querySelector('.bg-primary').classList.remove('d-none');
-        document.querySelector('#price').textContent = `CHF ${event.data}`;
+        document.querySelector('#price').textContent = `CHF ${Number(event.data).toFixed(2)}`;
+        button.removeAttribute('disabled');
+        spinner.classList.add('d-none');
+        status.textContent = 'Get Price';
       };
     </script>
 
