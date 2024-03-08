@@ -72,6 +72,18 @@
           You should be paying about <b id="price">CHF 0</b> per month, based on the model.
         </div>
       </div>
+
+      <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div class="toast align-items-center text-bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
+          <div class="d-flex">
+            <div class="toast-body">
+              <b>An error occured! Error message:</b> 
+              <div id="errormessage"></div>
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+          </div>
+        </div>
+      </div>
     </main>
 
     <footer class="footer mt-auto py-3 bg-body-tertiary">
@@ -85,6 +97,9 @@
       const pyWorker = new Worker("worker.js");
       const button = document.querySelector('#getprice');
       const status = document.querySelector('#status');
+      const toastEl = document.querySelector('.toast');
+      const toast = new bootstrap.Toast(toastEl, {});
+
       button.addEventListener('click', () => {
         const txtBfs_number = document.querySelector('#bfs_number').value;
         const txtArea = document.querySelector('#area').value;
@@ -100,9 +115,16 @@
         spinner.classList.remove('d-none');
         status.textContent = 'Calculating...';
       });
+
       pyWorker.onmessage = (event) => {
-        document.querySelector('.bg-primary').classList.remove('d-none');
-        document.querySelector('#price').textContent = `CHF ${Number(event.data).toFixed(2)}`;
+        const data = event.data;
+        if ('result' in data) {
+          document.querySelector('.bg-primary').classList.remove('d-none');
+          document.querySelector('#price').textContent = `CHF ${Number(data.result).toFixed(2)}`;
+        } else {
+          toastEl.querySelector('#errormessage').textContent = data.error;
+          toast.show();
+        }
         button.removeAttribute('disabled');
         spinner.classList.add('d-none');
         status.textContent = 'Get Price';

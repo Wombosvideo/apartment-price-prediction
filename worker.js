@@ -94,5 +94,9 @@ async function main(data) {
 }
 
 onmessage = (e) => {
-  main(e.data).then((result) => postMessage(result));
+  main(e.data).then((result) => postMessage({
+    result
+  })).catch((error) => postMessage({
+    error: error.message
+  }));
 };
