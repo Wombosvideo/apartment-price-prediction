@@ -3,14 +3,12 @@ let pyodide = null;
 async function setup() {
   importScripts('//cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js');
 
-  console.time('base64');
-
-  // This is a hardcoded example because JS running on file:// can't use fetch.
+  console.time('fetch');
 
   const bfs_municipality_and_tax_data = await (await fetch('bfs_municipality_and_tax_data.csv', { mode: 'cors' })).text();
   const randomforest_regression = await (await fetch('randomforest_regression.pkl', { mode: 'cors' })).arrayBuffer();
   
-  console.timeEnd('base64');
+  console.timeEnd('fetch');
   console.time('pyodide');
 
   console.log("Starting Pyodide...");
@@ -59,6 +57,8 @@ async function setup() {
   console.timeEnd('load');
 
   console.log("Setup done.");
+
+  postMessage({ ready: true });
 }
 
 async function main(data) {

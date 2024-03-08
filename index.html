@@ -99,6 +99,7 @@
       const status = document.querySelector('#status');
       const toastEl = document.querySelector('.toast');
       const toast = new bootstrap.Toast(toastEl, {});
+      let ready = false;
 
       button.addEventListener('click', () => {
         const txtBfs_number = document.querySelector('#bfs_number').value;
@@ -113,7 +114,7 @@
         pyWorker.postMessage({ bfs_number, area, rooms });
         button.setAttribute('disabled', 'disabled');
         spinner.classList.remove('d-none');
-        status.textContent = 'Calculating...';
+        status.textContent = ready ? 'Calculating...' : 'Loading model...';
       });
 
       pyWorker.onmessage = (event) => {
@@ -121,13 +122,18 @@
         if ('result' in data) {
           document.querySelector('.bg-primary').classList.remove('d-none');
           document.querySelector('#price').textContent = `CHF ${Number(data.result).toFixed(2)}`;
+        } else if ('ready' in data) {
+          status.textContent = 'Calculating...';
+          ready = true;
         } else {
           toastEl.querySelector('#errormessage').textContent = data.error;
           toast.show();
         }
-        button.removeAttribute('disabled');
-        spinner.classList.add('d-none');
-        status.textContent = 'Get Price';
+        if (!('ready' in data)) {
+          button.removeAttribute('disabled');
+          spinner.classList.add('d-none');
+          status.textContent = 'Get Price';
+        }
       };
     </script>
 
